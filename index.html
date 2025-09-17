@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In memoria di Anita e Paolo - Campoz.it</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            font-style: italic;
+        }
+
+        .memorial-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            margin-bottom: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .photo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .memorial-photo {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .memorial-photo:hover {
+            transform: scale(1.02);
+        }
+
+        .dedication {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #2c3e50;
+            text-align: justify;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(236, 240, 241, 0.5);
+            border-left: 4px solid #3498db;
+            border-radius: 5px;
+        }
+
+        .memory-wall {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .memory-wall h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 300;
+        }
+
+        .add-memory-form {
+            background: rgba(241, 245, 249, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .memories-list {
+            margin-top: 30px;
+        }
+
+        .memory-item {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #e74c3c;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            animation: fadeInMemory 0.8s ease forwards;
+        }
+
+        @keyframes fadeInMemory {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .memory-item:hover {
+            transform: translateX(5px);
+        }
+
+        .memory-author {
+            font-weight: 600;
+            color: #e74c3c;
+            margin-bottom: 8px;
+        }
+
+        .memory-text {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .memory-date {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .loading-message {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .memorial-section, .memory-wall {
+                padding: 20px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .memorial-section, .memory-wall {
+            animation: fadeIn 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💙 In memoria di Anita e Paolo 💙</h1>
+            <p class="subtitle">Un luogo dove celebrare la loro vita e condividere i ricordi più belli</p>
+        </header>
+
+        <section class="memorial-section">
+            <div class="photo-section">
+                <img src="foto-anita-paolo.jpg" alt="Anita e Paolo" class="memorial-photo">
+            </div>
+
+            <div class="dedication">
+                <p><strong>Mamma e Papà,</strong></p>
+                <p>Grazie per averci dedicato amore, tempo, risorse...la vita.</p>
+                <p><strong>Per Aspera Ad Astra.</strong></p>
+                <p style="text-align: right; font-style: italic; margin-top: 20px;">Matteo e Martina</p>
+            </div>
+        </section>
+
+        <section class="memory-wall">
+            <h2>🌹 Muro dei Ricordi 🌹</h2>
+            
+            <div class="add-memory-form">
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">Condividi un ricordo</h3>
+                
+                <div id="success-message" class="success-message">
+                    Grazie per aver condiviso il tuo ricordo. È stato pubblicato con successo!
+                </div>
+                
+                <div id="error-message" class="error-message" style="display: none;">
+                    Si è verificato un errore. Riprova tra poco.
+                </div>
+                
+                <form id="memory-form">
+                    <div class="form-group">
+                        <label for="nome">Il tuo nome:</label>
+                        <input type="text" id="nome" name="nome" required placeholder="Come vuoi essere ricordato?" maxlength="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ricordo">Il tuo ricordo o messaggio:</label>
+                        <textarea id="ricordo" name="ricordo" required placeholder="Condividi un ricordo, un pensiero speciale o un messaggio per loro..." maxlength="500"></textarea>
+                    </div>
+                    
+                    <button type="submit" id="submit-btn" class="btn">💝 Condividi Ricordo</button>
+                </form>
+            </div>
+
+            <div class="memories-list" id="memories-list">
+                <div class="loading-message" id="loading-message">
+                    Caricamento ricordi...
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Campoz.it - Creato con amore per celebrare e ricordare Anita e Paolo</p>
+            <p style="margin-top: 10px; font-size: 0.8em;">Questa pagina utilizza solo cookie tecnici essenziali per il funzionamento del sito.</p>
+        </footer>
+    </div>
+
+    <script>
+        class MemoryWall {
+            constructor() {
+                this.memoriesContainer = document.getElementById('memories-list');
+                this.loadingMessage = document.getElementById('loading-message');
+                this.form = document.getElementById('memory-form');
+                this.submitBtn = document.getElementById('submit-btn');
+                this.successMessage = document.getElementById('success-message');
+                this.errorMessage = document.getElementById('error-message');
+                
+                this.init();
+            }
+
+            init() {
+                this.loadMemories();
+                this.setupFormSubmission();
+                
+                // Ricarica i ricordi ogni 30 secondi per nuovi contenuti
+                setInterval(() => this.loadMemories(), 30000);
+            }
+
+            async loadMemories() {
+                try {
+                    const response = await fetch('/.netlify/functions/get-memories');
+                    const memories = await response.json();
+                    
+                    this.displayMemories(memories);
+                } catch (error) {
+                    console.error('Errore nel caricamento ricordi:', error);
+                    this.showErrorMessage('Errore nel caricamento dei ricordi');
+                }
+            }
+
+            displayMemories(memories) {
+                this.loadingMessage.style.display = 'none';
+                
+                if (!memories || memories.length === 0) {
+                    this.memoriesContainer.innerHTML = `
+                        <div class="loading-message">
+                            Non ci sono ancora ricordi condivisi. Sii il primo a lasciare un pensiero speciale.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Ordina i ricordi dal più recente al più vecchio
+                const sortedMemories = memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                this.memoriesContainer.innerHTML = sortedMemories.map(memory => this.createMemoryHTML(memory)).join('');
+            }
+
+            createMemoryHTML(memory) {
+                const date = new Date(memory.timestamp);
+                const formattedDate = date.toLocaleDateString('it-IT', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="memory-item">
+                        <div class="memory-author">${this.escapeHtml(memory.nome)}</div>
+                        <div class="memory-text">${this.escapeHtml(memory.ricordo).replace(/\n/g, '<br>')}</div>
+                        <div class="memory-date">${formattedDate}</div>
+                    </div>
+                `;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            setupFormSubmission() {
+                this.form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.submitMemory();
+                });
+            }
+
+            async submitMemory() {
+                const nome = document.getElementById('nome').value.trim();
+                const ricordo = document.getElementById('ricordo').value.trim();
+
+                if (!nome || !ricordo) {
+                    this.showErrorMessage('Per favore, compila tutti i campi.');
+                    return;
+                }
+
+                // Validazione lunghezza
+                if (nome.length > 50) {
+                    this.showErrorMessage('Il nome non può superare i 50 caratteri.');
+                    return;
+                }
+
+                if (ricordo.length > 500) {
+                    this.showErrorMessage('Il messaggio non può superare i 500 caratteri.');
+                    return;
+                }
+
+                // Filtro anti-spam base
+                if (this.containsSpam(nome) || this.containsSpam(ricordo)) {
+                    this.showErrorMessage('Il contenuto non è appropriato per questo sito commemorativo.');
+                    return;
+                }
+
+                this.setLoading(true);
+
+                try {
+                    const response = await fetch('/.netlify/functions/add-memory', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            nome: nome,
+                            ricordo: ricordo,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+
+                    if (response.ok) {
+                        this.showSuccessMessage();
+                        this.form.reset();
+                        // Ricarica i ricordi dopo 1 secondo per mostrare il nuovo
+                        setTimeout(() => this.loadMemories(), 1000);
+                    } else {
+                        throw new Error('Errore del server');
+                    }
+                } catch (error) {
+                    console.error('Errore nell\'invio:', error);
+                    this.showErrorMessage('Errore nell\'invio del ricordo. Riprova tra poco.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            containsSpam(text) {
+                const spamWords = ['viagra', 'casino', 'lottery', 'win money', 'click here', 'free money'];
+                const lowerText = text.toLowerCase();
+                return spamWords.some(word => lowerText.includes(word));
+            }
+
+            setLoading(isLoading) {
+                this.submitBtn.disabled = isLoading;
+                this.submitBtn.textContent = isLoading ? 'Invio in corso...' : '💝 Condividi Ricordo';
+            }
+
+            showSuccessMessage() {
+                this.hideMessages();
+                this.successMessage.style.display = 'block';
+                setTimeout(() => {
+                    this.successMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            showErrorMessage(message) {
+                this.hideMessages();
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    this.errorMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            hideMessages() {
+                this.successMessage.style.display = 'none';
+                this.errorMessage.style.display = 'none';
+            }
+        }
+
+        // Inizializza l'applicazione quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', () => {
+            new MemoryWall();
+        });
+    </script>
+</body>
+</html>
