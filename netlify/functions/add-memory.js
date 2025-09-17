@@ -1,6 +1,17 @@
-// netlify/functions/add-memory.js
-const { readFileSync, writeFileSync, existsSync, mkdirSync } = require('fs');
-const { join } = require('path');
+const admin = require('firebase-admin');
+
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        }),
+        projectId: process.env.FIREBASE_PROJECT_ID
+    });
+}
+
+const db = admin.firestore();
 
 exports.handler = async (event, context) => {
     const headers = {
@@ -56,38 +67,14 @@ exports.handler = async (event, context) => {
         const sanitize = (str) => str.replace(/[<>]/g, '');
 
         const newMemory = {
-            id: Date.now() + Math.random().toString(36).substr(2, 9),
             nome: sanitize(nome.trim()),
             ricordo: sanitize(ricordo.trim()),
-            timestamp: new Date(timestamp).toISOString(),
-            approved: true
+            timestamp: admin.firestore.Timestamp.fromDate(new Date(timestamp)),
+            approved: true,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        const dataDir = '/tmp';
-        const dataPath = join(dataDir, 'memories.json');
-
-        if (!existsSync(dataDir)) {
-            mkdirSync(dataDir, { recursive: true });
-        }
-
-        let memories = [];
-        
-        if (existsSync(dataPath)) {
-            try {
-                const data = readFileSync(dataPath, 'utf8');
-                memories = JSON.parse(data);
-            } catch (error) {
-                memories = [];
-            }
-        }
-
-        memories.push(newMemory);
-
-        if (memories.length > 100) {
-            memories = memories.slice(-100);
-        }
-
-        writeFileSync(dataPath, JSON.stringify(memories, null, 2));
+        const docRef = await db.collection('memories').add(newMemory);
 
         return {
             statusCode: 200,
@@ -95,7 +82,7 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({ 
                 success: true, 
                 message: 'Ricordo salvato con successo',
-                memory: newMemory
+                id: docRef.id
             })
         };
 

@@ -1,6 +1,18 @@
-// netlify/functions/get-memories.js
-const { readFileSync, existsSync } = require('fs');
-const { join } = require('path');
+const admin = require('firebase-admin');
+
+// Inizializza Firebase con variabili d'ambiente
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        }),
+        projectId: process.env.FIREBASE_PROJECT_ID
+    });
+}
+
+const db = admin.firestore();
 
 exports.handler = async (event, context) => {
     const headers = {
@@ -23,19 +35,22 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const dataPath = join('/tmp', 'memories.json');
-        let memories = [];
+        const snapshot = await db.collection('memories')
+            .where('approved', '==', true)
+            .orderBy('timestamp', 'desc')
+            .limit(100)
+            .get();
 
-        if (existsSync(dataPath)) {
-            try {
-                const data = readFileSync(dataPath, 'utf8');
-                const allMemories = JSON.parse(data);
-                memories = allMemories.filter(memory => memory.approved === true);
-                memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            } catch (error) {
-                memories = [];
-            }
-        }
+        const memories = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            memories.push({
+                id: doc.id,
+                nome: data.nome,
+                ricordo: data.ricordo,
+                timestamp: data.timestamp.toDate().toISOString()
+            });
+        });
 
         return {
             statusCode: 200,
