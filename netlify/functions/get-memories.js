@@ -1,19 +1,5 @@
 const admin = require('firebase-admin');
 
-// Inizializza Firebase con variabili d'ambiente
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        }),
-        projectId: process.env.FIREBASE_PROJECT_ID
-    });
-}
-
-const db = admin.firestore();
-
 exports.handler = async (event, context) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -35,6 +21,25 @@ exports.handler = async (event, context) => {
     }
 
     try {
+        console.log('Checking environment variables...');
+        console.log('PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
+        console.log('CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
+        console.log('PRIVATE_KEY exists:', !!process.env.FIREBASE_PRIVATE_KEY);
+
+        if (!admin.apps.length) {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                }),
+                projectId: process.env.FIREBASE_PROJECT_ID
+            });
+        }
+
+        const db = admin.firestore();
+        console.log('Firebase initialized successfully');
+
         const snapshot = await db.collection('memories')
             .where('approved', '==', true)
             .orderBy('timestamp', 'desc')
@@ -59,12 +64,15 @@ exports.handler = async (event, context) => {
         };
 
     } catch (error) {
-        console.error('Errore nella funzione get-memories:', error);
+        console.error('Detailed error:', error);
         
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Errore interno del server' })
+            body: JSON.stringify({ 
+                error: 'Errore interno del server',
+                details: error.message 
+            })
         };
     }
 };
