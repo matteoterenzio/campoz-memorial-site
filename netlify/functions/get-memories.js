@@ -1,6 +1,15 @@
-// netlify/functions/get-memories.js
-const { readFileSync, existsSync } = require('fs');
-const { join } = require('path');
+const admin = require('firebase-admin');
+
+// Inizializza Firebase Admin (solo una volta)
+if (!admin.apps.length) {
+    const serviceAccount = require('../../firebase-service-account.json');
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: 'campoz-memorial'
+    });
+}
+
+const db = admin.firestore();
 
 exports.handler = async (event, context) => {
     const headers = {
@@ -23,19 +32,23 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const dataPath = join('/tmp', 'memories.json');
-        let memories = [];
+        // Recupera i ricordi da Firestore
+        const snapshot = await db.collection('memories')
+            .where('approved', '==', true)
+            .orderBy('timestamp', 'desc')
+            .limit(100)
+            .get();
 
-        if (existsSync(dataPath)) {
-            try {
-                const data = readFileSync(dataPath, 'utf8');
-                const allMemories = JSON.parse(data);
-                memories = allMemories.filter(memory => memory.approved === true);
-                memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            } catch (error) {
-                memories = [];
-            }
-        }
+        const memories = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            memories.push({
+                id: doc.id,
+                nome: data.nome,
+                ricordo: data.ricordo,
+                timestamp: data.timestamp.toDate().toISOString()
+            });
+        });
 
         return {
             statusCode: 200,
