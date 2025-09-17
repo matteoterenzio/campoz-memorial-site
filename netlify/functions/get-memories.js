@@ -1,11 +1,14 @@
 const admin = require('firebase-admin');
 
-// Inizializza Firebase Admin (solo una volta)
+// Inizializza Firebase con variabili d'ambiente
 if (!admin.apps.length) {
-    const serviceAccount = require('../../firebase-service-account.json');
     admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: 'campoz-memorial'
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        }),
+        projectId: process.env.FIREBASE_PROJECT_ID
     });
 }
 
@@ -32,7 +35,6 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Recupera i ricordi da Firestore
         const snapshot = await db.collection('memories')
             .where('approved', '==', true)
             .orderBy('timestamp', 'desc')
